@@ -1,0 +1,9 @@
+sounddevice
+soundfile
+numpy
+requests
+rich
+python-dotenv
+pynput
+pyautogui
+openai

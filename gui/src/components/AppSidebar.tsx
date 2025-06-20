@@ -118,7 +118,7 @@ export function AppSidebar() {
 
         <SidebarFooter className="p-6">
           <div className="text-xs text-slate-500">
-            v1.0.0 • AI Transcription
+            v1.0.0 • VaibVoice
           </div>
         </SidebarFooter>
       </Sidebar>

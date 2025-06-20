@@ -29,23 +29,14 @@ def check_dependencies():
 
 def check_gui_build():
     """
-    Check if the GUI is built.
+    Check if the GUI is built. Only builds if the build directory doesn't exist.
     """
     gui_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gui")
     build_dir = os.path.join(gui_dir, "dist")
 
-    # Remove the build directory if it exists
-    if os.path.exists(build_dir):
-        print("Removing existing build directory...")
-        try:
-            subprocess.run(["rm", "-rf", build_dir], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error removing build directory: {e}")
-            sys.exit(1)
-
-    # Only remove and rebuild the GUI if the build directory doesn't exist
+    # Only build the GUI if the build directory doesn't exist
     if not os.path.exists(build_dir):
-        print("Building GUI...")
+        print("GUI build directory not found. Building GUI...")
         # Check if Node.js is installed
         try:
             subprocess.run(["node", "--version"], check=True, stdout=subprocess.PIPE)
@@ -54,11 +45,11 @@ def check_gui_build():
             print("Please install Node.js from https://nodejs.org/")
             sys.exit(1)
 
-
-
         # Install dependencies and build the GUI
         subprocess.run(["npm", "install"], cwd=gui_dir, check=True)
         subprocess.run(["npm", "run", "build"], cwd=gui_dir, check=True)
+    else:
+        print("GUI already built. Skipping build step.")
 
 def main():
     """

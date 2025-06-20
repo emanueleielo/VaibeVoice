@@ -88,23 +88,18 @@ VaibVoice is an advanced AI-powered voice transcription application that convert
    pip install -r requirements.txt
    ```
 
-3. **Install and build the frontend**
-   ```bash
-   cd gui
-   npm install
-   npm run build
-   cd ..
-   ```
-
-4. **Configure your OpenAI API key**
-   - Launch the application
-   - Navigate to Settings
-   - Enter your OpenAI API key
-
-5. **Run the application**
+3. **Run the application**
    ```bash
    python run.py
    ```
+   The script will automatically:
+   - Install any missing Python dependencies
+   - Build the frontend if it hasn't been built already (requires Node.js)
+
+4. **Configure your OpenAI API key**
+   - Navigate to Settings in the application
+   - Enter your OpenAI API key
+   - Save your settings
 
 ## 🎮 Usage
 

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
+import Playground from "./pages/Playground";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import Language from "./pages/Language";
@@ -26,6 +27,7 @@ const App = () => (
             <main className="flex-1 p-6">
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/playground" element={<Playground />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/language" element={<Language />} />

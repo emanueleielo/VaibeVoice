@@ -1,6 +1,6 @@
 """
-Keyboard recorder module for VaibVoice.
-Provides functionality for recording audio using keyboard controls.
+Core functionality for keyboard recording.
+Provides functions for recording audio using keyboard controls.
 """
 
 import sys
@@ -8,34 +8,36 @@ import time
 import platform
 from pynput import keyboard
 
-from src.audio.recorder import AudioRecorder
-from src.db.history import TranscriptionHistory
-from src.api.transcription import transcribe_audio_stream
+from vaibvoice.core.recorder import AudioRecorder
+from vaibvoice.core.transcriber import transcribe_audio
+from vaibvoice.services.transcription_service import TranscriptionService
+import vaibvoice.config as config
 
 def key_recording():
     """
     Record audio when a specific key is pressed and transcribe when released.
-    Uses Fn key on macOS and Ctrl key as fallback.
+    Uses Ctrl key by default, but can be configured in the .env file.
     """
     recorder = AudioRecorder()
+    service = TranscriptionService()
     recording_in_progress = False
 
-    # Determine the key to use for recording based on platform
-    system = platform.system()
-    if system == "Darwin":  # macOS
-        # On macOS, we'll try to use the Fn key, but it's not directly accessible
-        # So we'll use the Ctrl key as a fallback
-        RECORD_KEY = keyboard.Key.ctrl
-        print("\nUsing Ctrl key for recording (Fn key not directly accessible).")
-    else:
-        # On other platforms, use Ctrl key
-        RECORD_KEY = keyboard.Key.ctrl
+    # Determine the key to use for recording based on configuration
+    if config.RECORD_KEY.lower() == "ctrl":
+        RECORD_KEY_OBJ = keyboard.Key.ctrl
         print("\nUsing Ctrl key for recording.")
+    else:
+        # Try to use the specified key, fallback to Ctrl if not valid
+        try:
+            RECORD_KEY_OBJ = getattr(keyboard.Key, config.RECORD_KEY.lower())
+        except AttributeError:
+            RECORD_KEY_OBJ = keyboard.Key.ctrl
+            print(f"\nInvalid key '{config.RECORD_KEY}'. Using Ctrl key for recording.")
 
     def on_press(key):
         nonlocal recording_in_progress
         try:
-            if key == RECORD_KEY:
+            if key == RECORD_KEY_OBJ:
                 if not recording_in_progress:
                     recording_in_progress = True
                     print("\nRecording key pressed. Starting recording...")
@@ -46,7 +48,7 @@ def key_recording():
     def on_release(key):
         nonlocal recording_in_progress
         try:
-            if key == RECORD_KEY:
+            if key == RECORD_KEY_OBJ:
                 if recording_in_progress:
                     recording_in_progress = False
                     print("\nRecording key released. Stopping recording...")
@@ -57,14 +59,13 @@ def key_recording():
                         return
 
                     print("\nTranscribing audio and typing directly...")
-                    transcription = transcribe_audio_stream(audio_path)
+                    transcription = transcribe_audio(audio_path, type_directly=True)
 
                     print("\nTranscription:")
                     print(transcription)
 
-                    # Always save the transcription to history
-                    history = TranscriptionHistory()
-                    if history.add_transcription(audio_path, transcription, duration):
+                    # Save the transcription to history
+                    if service.add_transcription(audio_path, transcription, duration):
                         print("Transcription saved to history.")
                     else:
                         print("Failed to save transcription to history.")
@@ -76,7 +77,7 @@ def key_recording():
     listener.start()
 
     print("\nVaibVoice is running.")
-    print("Press and hold the Ctrl key to record, release to transcribe.")
+    print(f"Press and hold the {config.RECORD_KEY} key to record, release to transcribe.")
     print("The transcription will be automatically saved to history.")
     print("The text will be typed into the currently selected input box.")
     print("Press Ctrl+C to exit.")

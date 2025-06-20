@@ -6,4 +6,8 @@ rich
 python-dotenv
 pynput
 pyautogui
+pyperclip
 openai
+fastapi
+uvicorn
+pydantic

@@ -318,6 +318,7 @@ const Settings = () => {
                   <SelectContent>
                     <SelectItem value="gpt-4o-transcribe">gpt-4o-transcribe (More accurate, more expensive)</SelectItem>
                     <SelectItem value="gpt-4o-mini-transcribe">gpt-4o-mini-transcribe (Less accurate, faster, less expensive)</SelectItem>
+                    <SelectItem value="whisper-1">whisper-1 (Legacy Whisper model)</SelectItem>
                   </SelectContent>
                 </Select>
               )}

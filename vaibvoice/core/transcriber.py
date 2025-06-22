@@ -33,29 +33,39 @@ def transcribe_audio(audio_path: str, type_directly: bool = False) -> str:
     try:
         # Open the audio file
         with open(audio_path, 'rb') as audio_file:
-            # Create a streaming request to the OpenAI API
-            stream = openai.audio.transcriptions.create(
-                model=config.WHISPER_MODEL,
-                file=audio_file,
-                language=config.TRANSCRIPTION_LANGUAGE,
-                stream=True
-            )
+            if config.WHISPER_MODEL == "whisper-1":
+                # Whisper-1 does not support streaming
+                response = openai.audio.transcriptions.create(
+                    model=config.WHISPER_MODEL,
+                    file=audio_file,
+                    language=config.TRANSCRIPTION_LANGUAGE
+                )
+                if hasattr(response, "text"):
+                    full_transcription = response.text
+                else:
+                    full_transcription = str(response)
+            else:
+                # Create a streaming request to the OpenAI API
+                stream = openai.audio.transcriptions.create(
+                    model=config.WHISPER_MODEL,
+                    file=audio_file,
+                    language=config.TRANSCRIPTION_LANGUAGE,
+                    stream=True
+                )
 
-            # Process the streaming response
-            for event in stream:
-                # Handle TranscriptionTextDeltaEvent
-                if event.type == 'transcript.text.delta' and hasattr(event, 'delta'):
-                    # Get the transcription delta
-                    delta = event.delta
-                    if delta:
-                        # Don't type the delta directly anymore, just collect it
-                        # Append to the full transcription
-                        full_transcription += delta
-                # Handle TranscriptionTextDoneEvent
-                elif event.type == 'transcript.text.done' and hasattr(event, 'text'):
-                    # This event contains the complete transcription
-                    # We already have the full text from the delta events, so we can just log it
-                    print(f"Transcription complete: {event.text}")
+                # Process the streaming response
+                for event in stream:
+                    # Handle TranscriptionTextDeltaEvent
+                    if event.type == 'transcript.text.delta' and hasattr(event, 'delta'):
+                        # Get the transcription delta
+                        delta = event.delta
+                        if delta:
+                            # Append to the full transcription
+                            full_transcription += delta
+                    # Handle TranscriptionTextDoneEvent
+                    elif event.type == 'transcript.text.done' and hasattr(event, 'text'):
+                        # This event contains the complete transcription
+                        print(f"Transcription complete: {event.text}")
 
             # Format the transcription
             formatted_transcription = format_transcription(full_transcription)
